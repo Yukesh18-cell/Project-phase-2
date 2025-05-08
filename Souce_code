@@ -1,0 +1,41 @@
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+import pandas as pd
+
+# Step 1: Movie Data Collection (as a dataset)
+movies = pd.DataFrame({
+    "title": [
+        "Inception", "The Matrix", "Toy Story", "The Godfather",
+        "Fast & Furious", "The Hangover", "Interstellar", "Superbad"
+    ],
+    "genre": [
+        "Sci-Fi Action", "Sci-Fi Action", "Animation Comedy", "Crime Drama",
+        "Action Thriller", "Comedy", "Sci-Fi Drama", "Comedy Teen"
+    ]
+})
+
+# Step 2: User Profile (based on preferred genres or watched movies)
+user_profile = ["Sci-Fi", "Action", "Comedy"]
+
+# Step 3: Create a combined string for TF-IDF analysis
+movies["content"] = movies["genre"]
+
+# Step 4: Vectorize the movie genres using TF-IDF
+vectorizer = TfidfVectorizer()
+tfidf_matrix = vectorizer.fit_transform(movies["content"])
+
+# Step 5: Create a user profile vector
+user_profile_text = " ".join(user_profile)
+user_vector = vectorizer.transform([user_profile_text])
+
+# Step 6: Compute cosine similarity between user profile and each movie
+cosine_similarities = cosine_similarity(user_vector, tfidf_matrix).flatten()
+
+# Step 7: Get top N recommendations
+top_indices = cosine_similarities.argsort()[::-1]
+recommended_movies = movies.iloc[top_indices]
+
+# Step 8: Deliver Recommendations
+print("Personalized Movie Recommendations:")
+for title in recommended_movies["title"]:
+    print(f"- {title}")
